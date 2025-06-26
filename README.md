@@ -163,3 +163,96 @@ The request body must be a JSON object with the following structure:
 - The password must be at least 6 characters long.
 - Returns a JWT token for authentication in subsequent requests.
 - The user object contains user details except the password.
+
+## User Profile
+
+### Endpoint
+
+`GET /users/profile`
+
+### Description
+
+Returns the authenticated user's profile data. Requires a valid JWT token in the request (usually via cookie or Authorization header).
+
+### Authentication
+- Requires authentication (JWT token).
+
+### Responses
+
+#### Success
+- **Status Code:** `200 OK`
+- **Body:**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "_id": "<userId>",
+      "fullname": { "firstname": "John", "lastname": "Doe" },
+      "email": "john.doe@example.com",
+      ...
+    }
+  }
+  ```
+
+#### Authentication Error
+- **Status Code:** `401 Unauthorized`
+- **Body:**
+  ```json
+  {
+    "success": false,
+    "message": "Authentication required"
+  }
+  ```
+
+#### Other Errors
+- **Status Code:** `500 Internal Server Error`
+- **Body:**
+  ```json
+  {
+    "success": false,
+    "message": "Error message"
+  }
+  ```
+
+### Notes
+- The endpoint returns the user data for the authenticated user only.
+- JWT token must be provided in the request.
+
+## User Logout
+
+### Endpoint
+
+`GET /users/logout`
+
+### Description
+
+Logs out the authenticated user by clearing the authentication token (cookie) and blacklisting the token.
+
+### Authentication
+- Requires authentication (JWT token).
+
+### Responses
+
+#### Success
+- **Status Code:** `200 OK`
+- **Body:**
+  ```json
+  {
+    "success": true,
+    "message": "Logged out"
+  }
+  ```
+
+#### Other Errors
+- **Status Code:** `500 Internal Server Error`
+- **Body:**
+  ```json
+  {
+    "success": false,
+    "message": "Error message"
+  }
+  ```
+
+### Notes
+- The endpoint clears the authentication cookie and blacklists the token to prevent reuse.
+- JWT token must be provided in the request.
