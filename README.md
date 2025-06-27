@@ -256,3 +256,124 @@ Logs out the authenticated user by clearing the authentication token (cookie) an
 ### Notes
 - The endpoint clears the authentication cookie and blacklists the token to prevent reuse.
 - JWT token must be provided in the request.
+
+# Captain Registration Endpoint Documentation
+
+## Captain Registration
+
+### Endpoint
+
+`POST /captains/register`
+
+### Description
+
+Registers a new captain in the system. This endpoint validates the input, checks for existing captains by email, hashes the password, creates a captain with vehicle details, and returns an authentication token and captain data upon successful registration.
+
+### Request Body
+
+The request body must be a JSON object with the following structure:
+
+```
+{
+  "fullname": {
+    "firstname": "string (min 3 chars, required)",
+    "lastname": "string (min 3 chars, optional)"
+  },
+  "email": "string (valid email, required)",
+  "password": "string (min 6 chars, required)",
+  "vehicle": {
+    "color": "string (min 3 chars, required)",
+    "plate": "string (min 3 chars, required)",
+    "capacity": "integer (min 1, required)",
+    "vehicleType": "string (car | motorcycle | auto, required)"
+  }
+}
+```
+
+#### Example
+
+```
+{
+  "fullname": {
+    "firstname": "Alice",
+    "lastname": "Smith"
+  },
+  "email": "alice.smith@example.com",
+  "password": "securepassword",
+  "vehicle": {
+    "color": "Red",
+    "plate": "XYZ1234",
+    "capacity": 4,
+    "vehicleType": "car"
+  }
+}
+```
+
+### Responses
+
+#### Success
+- **Status Code:** `201 Created`
+- **Body:**
+  ```json
+  {
+    "success": true,
+    "token": "<JWT token>",
+    "captain": {
+      "_id": "<captainId>",
+      "fullname": { "firstname": "Alice", "lastname": "Smith" },
+      "email": "alice.smith@example.com",
+      "vehical": {
+        "color": "Red",
+        "plate": "XYZ1234",
+        "capacity": 4,
+        "vehicleType": "car"
+      },
+      ...
+    }
+  }
+  ```
+
+#### Validation Error
+- **Status Code:** `400 Bad Request`
+- **Body:**
+  ```json
+  {
+    "success": false,
+    "message": "Validation Failed",
+    "errors": [
+      { "msg": "Invalid Email", "param": "email", ... },
+      { "msg": "First name must be at least 3 characters long", "param": "fullname.firstname", ... },
+      { "msg": "Password must be at least 6 characters long", "param": "password", ... },
+      { "msg": "Color must be at least 3 characters long", "param": "vehicle.color", ... },
+      { "msg": "Plate must be at least 3 characters long", "param": "vehicle.plate", ... },
+      { "msg": "Capacity must be at least 1", "param": "vehicle.capacity", ... },
+      { "msg": "Invalid vehicle type", "param": "vehicle.vehicleType", ... }
+    ]
+  }
+  ```
+
+#### Captain Already Exists
+- **Status Code:** `400 Bad Request`
+- **Body:**
+  ```json
+  {
+    "success": false,
+    "message": "Captain already exist"
+  }
+  ```
+
+#### Other Errors
+- **Status Code:** `500 Internal Server Error`
+- **Body:**
+  ```json
+  {
+    "success": false,
+    "message": "Error message"
+  }
+  ```
+
+### Notes
+- The password is securely hashed before storage.
+- The returned token is a JWT for authentication in subsequent requests.
+- All required fields must be provided and valid for successful registration.
+- Vehicle details are required for captain registration.
