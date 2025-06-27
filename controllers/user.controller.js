@@ -67,6 +67,5 @@ export const logoutUser = async (req, res, next) => {
 };
 
 export const grtUserProfile = async (req, res, next) => {
-  console.log(req.user);
   res.status(200).json({ success: true, data: req.user });
 };
