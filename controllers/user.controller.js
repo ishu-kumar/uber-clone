@@ -12,6 +12,13 @@ export const registerUser = async (req, res, next) => {
   const { fullname, email, password } = req.body;
   const { firstname, lastname = "" } = fullname;
 
+  const isMatch = await User.findOne({ email });
+  if (isMatch) {
+    return res.status(400).json({
+      message: "User already registered",
+    });
+  }
+
   const hashedPassword = await User.hashPassword(password);
 
   const user = await createUser({
@@ -23,7 +30,7 @@ export const registerUser = async (req, res, next) => {
 
   const token = user.generateAuthToken();
 
-  res.status(201).json({ success: true, token: token });
+  res.status(201).json({ success: true, token: token, user: user });
 };
 
 export const loginUser = async (req, res, next) => {
@@ -40,14 +47,14 @@ export const loginUser = async (req, res, next) => {
   const user = await User.findOne({ email }).select("+password");
   if (!user) {
     return res
-      .status(401)
+      .status(400)
       .json({ success: false, message: "Invalid email or password" });
   }
 
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
     return res
-      .status(401)
+      .status(400)
       .json({ success: false, message: "Invalid email or password" });
   }
 
@@ -58,11 +65,10 @@ export const loginUser = async (req, res, next) => {
 };
 
 export const logoutUser = async (req, res, next) => {
+  const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+  await BlacklistToken.create({ token: token });
+
   res.clearCookie("token");
-  const token = req.cookies.token || req.header.authorization.split(" ")[1];
-
-  await BlacklistToken.create({ token });
-
   res.status(200).json({ success: true, message: "Logged out" });
 };
 

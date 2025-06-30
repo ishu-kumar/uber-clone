@@ -6,12 +6,12 @@ import { Captain } from "../models/captain.model.js";
 
 export const authUser = async (req, res, next) => {
   const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+
   if (!token) {
     return res.status(401).json({ success: false, message: "Unauthrized" });
   }
-
   const isBlacklisted = await BlacklistToken.findOne({ token });
-  if (!isBlacklisted) {
+  if (isBlacklisted) {
     return res.status(401).json({ success: false, message: "Unauthrized" });
   }
 
@@ -45,7 +45,7 @@ export const authCaptain = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     const captain = await Captain.findById(decoded._id);
     req.captain = captain;
-
+     
     return next();
   } catch (err) {
     console.log(err);

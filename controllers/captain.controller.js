@@ -75,11 +75,11 @@ export const loginCaptain = async (req, res, next) => {
 };
 
 export const logoutCaptain = async (req, res, next) => {
-  res.clearCookie("token");
-  const token = req.cookies.token || req.header.authorization.split(" ")[1];
-
+  const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+  console.log(token)
   await BlacklistToken.create({ token });
 
+  res.clearCookie("token");
   res.status(200).json({ success: true, message: "Logged out" });
 };
 
